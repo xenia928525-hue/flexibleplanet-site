@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexible Planet - AI Marketing Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; background-color: #030014; color: #fff; overflow-x: hidden; }
+        
+        /* 优化：深色星空背景 + 科技光晕 */
+        .tech-bg {
+            background-color: #030014;
+            background-image: 
+                radial-gradient(2px 2px at 40px 60px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 20px 150px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 90px 90px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 180px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 220px 110px, #fff, rgba(0,0,0,0)),
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 40%), 
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+            background-size: 300px 300px, 300px 300px, 300px 300px, 300px 300px, 300px 300px, 300px 300px, 100% 100%, 100% 100%;
+            background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s;
+        }
+
+        /* 轮播核心逻辑 */
+        .marquee-container {
+            display: flex;
+            overflow: hidden;
+            user-select: none;
+            gap: 20px;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-content {
+            display: flex;
+            flex-shrink: 0;
+            gap: 20px;
+            min-width: max-content;
+            animation: scroll 60s linear infinite;
+        }
+        .marquee-content.reverse { animation-direction: reverse; }
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(calc(-100% - 20px)); } }
+        
+        .showcase-card {
+            width: 210px; height: 290px;
+            border-radius: 14px; overflow: hidden;
+            position: relative; flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .showcase-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .showcase-card:hover img { transform: scale(1.1); }
+
+        .label-tag {
+            position: absolute; bottom: 10px; left: 10px;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            padding: 3px 10px; border-radius: 6px; font-size: 0.7rem; color: #fff;
+        }
+
+        .data-card {
+            width: 210px; height: 290px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; border-radius: 14px;
+            border: 1px solid rgba(99, 102, 241, 0.2); 
+            background: linear-gradient(145deg, rgba(79, 70, 229, 0.1), rgba(0, 0, 0, 0.4));
+        }
+
+        .option-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.2s;
+        }
+        .option-card.selected { background: rgba(79, 70, 229, 0.15); border-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+
+        .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* 强制下拉框样式 */
+        select option { background-color: #030014 !important; color: white !important; }
+    </style>
+</head>
+<body class="tech-bg min-h-screen">
+
+    <nav class="fixed w-full z-50 bg-[#030014]/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center cursor-pointer" onclick="location.reload()">
+                <img src="./图片1(1).png" alt="Flexible Planet" class="h-10 w-auto mr-3">
+                <span class="text-xl font-bold tracking-tight">Flexible Planet <span class="text-xs font-normal text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded ml-2">Merchant Pro</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleLang()" id="lang-btn" class="text-indigo-300 hover:text-white font-medium text-sm transition">中 / EN</button>
+                <button onclick="showEmail(this)" data-i18n="navContact" class="px-5 py-2 rounded-full border border-white/20 text-sm font-medium hover:bg-white hover:text-black transition-all duration-300">Contact Consultant</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="pt-32 pb-6 px-6 max-w-7xl mx-auto text-center flex flex-col items-center">
+        <div class="inline-block relative fade-in-up mb-3">
+            <h1 class="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight relative z-10 pb-3 whitespace-nowrap" data-i18n="heroTitle">AI Marketing Full-Managed Growth Engine</h1>
+            <div class="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500/0 via-indigo-500 to-indigo-500/0 rounded-full"></div>
+        </div>
+        
+        <h2 class="text-2xl md:text-4xl font-semibold text-indigo-400 drop-shadow-[0_0_10px_rgba(129,140,248,0.4)] fade-in-up mt-3 mb-6" style="animation-delay: 0.1s;" data-i18n="heroSub">
+            Tailored for Local Singapore Businesses
+        </h2>
+
+        <p class="text-lg md:text-xl text-slate-400 max-w-4xl mx-auto font-light fade-in-up mb-6" style="animation-delay: 0.2s;" data-i18n="heroDesc">
+            Delivering a comprehensive growth solution integrating strategy breakdown, local shooting, cross-border post-production, and precision ad targeting.
+        </p>
+        
+        <div class="fade-in-up" style="animation-delay: 0.3s;">
+            <button onclick="scrollToForm()" class="btn-primary px-10 py-4 rounded-full text-lg font-bold"><span data-i18n="heroBtn">Generate My Brief Now</span> <i class="fa-solid fa-bolt ml-3"></i></button>
+        </div>
+
+        <div class="w-full mt-12">
+            <div class="marquee-container mb-6 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="marquee-content">
+                    <div class="showcase-card"><img src="川菜.png" onerror="this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat1">Chinese Cuisine</div></div>
+                    <div class="showcase-card"><img src="西餐.png" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat2">Fine Dining</div></div>
+                    <div class="showcase-card"><img src="服饰.png" onerror="this.src='https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat3">Fashion Retail</div></div>
+                    <div class="showcase-card"><img src="按摩.png" onerror="this.src='https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat4">Wellness SPA</div></div>
+                    <div class="showcase-card"><img src="美甲.png" onerror="this.src='https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat5">Beauty & Care</div></div>
+                    <div class="showcase-card"><img src="画画.png" onerror="this.src='https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat6">Enrichment Class</div></div>
+                    <div class="showcase-card"><img src="舞蹈.png" onerror="this.src='https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat7">Dance Studio</div></div>
+                    <div class="showcase-card"><img src="健身.png" onerror="this.src='https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat8">Personal Training</div></div>
+                    <div class="showcase-card"><img src="瑜伽.png" onerror="this.src='https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format'"><div class="label-tag" data-i18n="cat9">Yoga & Pilates</div></div>
+                </div>
+                <div class="marquee-content" aria-hidden="true">
+                    <div class="showcase-card"><img src="川菜.png" onerror="this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="西餐.png" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="服饰.png" onerror="this.src='https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="按摩.png" onerror="this.src='https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="美甲.png" onerror="this.src='https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="画画.png" onerror="this.src='https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="舞蹈.png" onerror="this.src='https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="健身.png" onerror="this.src='https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format'"></div><div class="showcase-card"><img src="瑜伽.png" onerror="this.src='https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format'"></div>
+                </div>
+            </div>
+
+            <div class="marquee-container fade-in-up" style="animation-delay: 0.5s;">
+                <div class="marquee-content reverse">
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format"><div class="label-tag" data-i18n="stat1">Real-time Data</div></div>
+                    <div class="data-card"><div class="text-4xl font-bold text-green-400 mb-2">+340%</div><div class="text-sm text-slate-300" data-i18n="stat2">Foot Traffic Increase</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format"><div class="label-tag" data-i18n="stat3">ROI Monitoring</div></div>
+                    <div class="data-card"><div class="text-4xl font-bold text-indigo-400 mb-2">S$ 3.2</div><div class="text-sm text-slate-300" data-i18n="stat4">Cost Per Acquisition</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=600&auto=format"><div class="label-tag" data-i18n="stat5">Conversion Funnel</div></div>
+                    <div class="data-card"><div class="text-4xl font-bold text-purple-400 mb-2">6.8x</div><div class="text-sm text-slate-300" data-i18n="stat6">Ad ROAS</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&sat=-50"><div class="label-tag" data-i18n="stat7">User Demographics</div></div>
+                    <div class="data-card"><div class="text-4xl font-bold text-pink-400 mb-2">42%</div><div class="text-sm text-slate-300" data-i18n="stat8">Private Traffic Growth</div></div>
+                </div>
+                <div class="marquee-content reverse" aria-hidden="true">
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format"></div><div class="data-card"><div class="text-4xl font-bold text-green-400 mb-2">+340%</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format"></div><div class="data-card"><div class="text-4xl font-bold text-indigo-400 mb-2">S$ 3.2</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=600&auto=format"></div><div class="data-card"><div class="text-4xl font-bold text-purple-400 mb-2">6.8x</div></div>
+                    <div class="showcase-card"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&sat=-50"></div><div class="data-card"><div class="text-4xl font-bold text-pink-400 mb-2">42%</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="input-form" class="py-12 px-4 max-w-4xl mx-auto">
+        <div class="glass-card rounded-3xl p-6 md:p-10 border border-indigo-500/30 bg-[#0f172a]/80 shadow-[0_0_50px_rgba(79,70,229,0.1)]">
+            <h2 class="text-2xl font-bold mb-10 border-b border-white/10 pb-4 text-center" data-i18n="formTitle">Customize Your Growth Strategy</h2>
+            
+            <div class="space-y-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q1">1. What is your business industry?</label>
+                        <select id="industry" onchange="checkOther('industry', this)" class="w-full bg-[#030014] border border-white/10 rounded-xl px-4 py-3 text-white outline-none hover:border-indigo-500 transition">
+                            <option value="" disabled selected data-i18n="q1Default">Select specific category...</option>
+                            <optgroup label="F&B" data-i18n-label="g1">
+                                <option data-i18n="o1_1">Restaurant / Dining</option>
+                                <option data-i18n="o1_2">Fast Food / Light Meals / Bistro</option>
+                                <option data-i18n="o1_3">Cafe / Dessert</option>
+                                <option data-i18n="o1_4">Hawker / Kopitiam</option>
+                                <option data-i18n="o1_5">Bubble Tea / Beverage</option>
+                                <option data-i18n="o1_6">Bar / Nightlife</option>
+                            </optgroup>
+                            <optgroup label="Beauty & Health" data-i18n-label="g2">
+                                <option data-i18n="o2_1">Hair Salon</option>
+                                <option data-i18n="o2_2">Nail / Lash / Semi-permanent</option>
+                                <option data-i18n="o2_3">Beauty / Aesthetics / Spa</option>
+                                <option data-i18n="o2_4">TCM / Chiropractic / Massage</option>
+                                <option data-i18n="o2_5">Gym / Yoga / Pilates</option>
+                            </optgroup>
+                            <optgroup label="Education & Services" data-i18n-label="g3">
+                                <option data-i18n="o3_1">Tutoring / Skill Training</option>
+                                <option data-i18n="o3_2">Art / Dance / Music</option>
+                                <option data-i18n="o3_3">Pet Grooming / Boarding</option>
+                                <option data-i18n="o3_4">Domestic / Cleaning / Repair</option>
+                                <option data-i18n="o3_5">Photography / Wedding / Event</option>
+                            </optgroup>
+                            <optgroup label="Retail & E-commerce" data-i18n-label="g4">
+                                <option data-i18n="o4_1">Fashion / Apparel / Accessories</option>
+                                <option data-i18n="o4_2">Home / Lifestyle Goods</option>
+                                <option data-i18n="o4_3">3C / Electronics</option>
+                                <option data-i18n="o4_4">Beauty & Personal Care Retail</option>
+                                <option data-i18n="o4_5">Supermarket / Convenience Store</option>
+                            </optgroup>
+                            <option value="other" data-i18n="oOther">Other (Click to type...)</option>
+                        </select>
+                        <div id="industry-other" class="mt-3 hidden">
+                            <input id="industry-other-input" type="text" class="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-4 py-2 text-sm text-white outline-none" placeholder="Enter your specific industry..." data-i18n-ph="pOtherInd">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q2">2. Store Location (SG Location)</label>
+                        <input id="location" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="e.g., 313 Somerset / Bedok Mall" data-i18n-ph="pLoc">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-300 mb-4" data-i18n="q3">3. What is your biggest growth pain point? (Multiple)</label>
+                    <div id="pain-points-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp1">Quiet weekday lunches</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp2">Low brand awareness</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp3">High traffic, low sales</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp4">High delivery commissions</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp5">Competitors big on TikTok</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp6">Few Google Maps reviews</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp7">Followers not converting</span></div>
+                        <div class="option-card p-3 rounded-lg cursor-pointer flex items-start" onclick="selectMultiOption(this)"><div class="mt-1 w-4 h-4 rounded border border-slate-500 mr-2 flex-shrink-0 flex items-center justify-center check-box"></div><span class="text-[10px] text-slate-200" data-i18n="pp8">Need festival sales burst</span></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-300 mb-3" data-i18n="q4">4. Desired Content Direction (Multiple)</label>
+                    <div id="directions-container" class="flex flex-wrap gap-2">
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd1">Influencer Store Visit</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd2">Brand Image Video</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd3">Founder Story</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd4">Customer Testimonials</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd5">Satisfying Process Close-ups</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTag(this)" data-i18n="cd6">Street Interviews</span>
+                        <span class="tag-select px-3 py-1.5 rounded-full border border-slate-600 bg-slate-800/50 text-[10px] cursor-pointer" onclick="toggleTagWithInput(this, 'dir-other')" data-i18n="cd7">Other needs...</span>
+                    </div>
+                    <div id="dir-other" class="mt-3 hidden">
+                        <input id="dir-other-input" type="text" class="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-4 py-2 text-sm text-white outline-none" placeholder="Describe your other content ideas..." data-i18n-ph="pOtherDir">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-300 mb-3" data-i18n="q5">5. Preferred Visual Style (Multiple)</label>
+                    <div id="styles-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs1">Authentic & Grounded</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs2">Premium & Elegant</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs3">Cool & Techy</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs4">Retro Cinematic</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs5">Bright & Dopamine</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this)"><div class="text-[10px] font-bold" data-i18n="vs6">Minimalist Nordic</div></div>
+                        <div class="option-card p-2 rounded text-center cursor-pointer" onclick="selectMultiOption(this); toggleId('sty-other')"><div class="text-[10px] font-bold" data-i18n="vs7">Other...</div></div>
+                    </div>
+                    <div id="sty-other" class="mt-3 hidden">
+                        <input id="sty-other-input" type="text" class="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-4 py-2 text-sm text-white outline-none" placeholder="Describe your desired style..." data-i18n-ph="pOtherStyle">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q6">6. Specific Content Requirements (Key)</label>
+                    <textarea id="requirements" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white h-28" placeholder="1. Main product this month; 2. Core selling points; 3. Shooting taboos, etc." data-i18n-ph="pReq"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q7">7. Any other additions (Optional)</label>
+                    <input id="additions" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Budget, publishing timeline, etc..." data-i18n-ph="pAdd">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-white/5 border border-indigo-500/30">
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q8">8. Your Contact Info *</label>
+                        <div class="flex gap-2">
+                            <select id="contact-type" class="w-1/3 bg-[#030014] border border-white/10 rounded-xl px-2 py-3 text-white outline-none">
+                                <option>WhatsApp</option><option data-i18n="wechat">WeChat</option>
+                            </select>
+                            <input id="contact-id" type="text" class="flex-1 bg-[#030014] border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="ID or Number" data-i18n-ph="pID">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-300 mb-2" data-i18n="q9">9. Email for receiving proposal *</label>
+                        <input id="email" type="email" class="w-full bg-[#030014] border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="example@domain.com">
+                    </div>
+                </div>
+
+                <button onclick="generateBrief()" class="w-full btn-primary py-4 rounded-xl font-bold text-lg text-white" data-i18n="submitBtn">Generate Exclusive Growth Proposal (Delivered within 24H)</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="brief-modal" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-[#0f172a] border border-indigo-500/50 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-indigo-900/20">
+                <div class="flex items-center"><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-3"></div><h3 class="font-bold text-indigo-400" id="modal-title" data-i18n="modalTitle">AI Marketing Engine Processing...</h3></div>
+                <button onclick="closeBrief()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-8 font-mono text-xs leading-relaxed text-slate-300 h-64 overflow-y-auto" id="brief-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // UI Interaction Functions
+        function scrollToForm() { document.getElementById('input-form').scrollIntoView({ behavior: 'smooth' }); }
+        function checkOther(type, el) { const box = document.getElementById(type + '-other'); if (el.value === 'other') box.classList.remove('hidden'); else box.classList.add('hidden'); }
+        function toggleId(id) { document.getElementById(id).classList.toggle('hidden'); }
+        
+        function selectMultiOption(el) { el.classList.toggle('selected'); const check = el.querySelector('.check-box'); if(check) check.innerHTML = el.classList.contains('selected') ? '<i class="fa-solid fa-check text-[10px] text-indigo-400"></i>' : ''; }
+        
+        function toggleTag(el) { el.classList.toggle('bg-indigo-600'); el.classList.toggle('border-indigo-500'); el.classList.toggle('text-white'); }
+        function toggleTagWithInput(el, inputId) { toggleTag(el); const input = document.getElementById(inputId); if (el.classList.contains('bg-indigo-600')) input.classList.remove('hidden'); else input.classList.add('hidden'); }
+
+        function showEmail(btn) { 
+            const email = 'lijing241206@163.com'; 
+            btn.innerHTML = `<i class="fa-regular fa-envelope mr-2"></i>${email}`; 
+            btn.classList.add('bg-white', 'text-black'); 
+            btn.removeAttribute('data-i18n'); 
+            navigator.clipboard.writeText(email); 
+        }
+
+        // --- i18n Dictionary & Logic ---
+        const translations = {
+            en: {
+                navContact: "Contact Consultant",
+                heroTitle: "AI Marketing Full-Managed Growth Engine",
+                heroSub: "Tailored for Local Singapore Businesses",
+                heroDesc: "Delivering a comprehensive growth solution integrating strategy breakdown, local shooting, cross-border post-production, and precision ad targeting.",
+                heroBtn: "Generate My Brief Now",
+                cat1: "Chinese Cuisine", cat2: "Fine Dining", cat3: "Fashion Retail", cat4: "Wellness SPA", cat5: "Beauty & Care", cat6: "Enrichment Class", cat7: "Dance Studio", cat8: "Personal Training", cat9: "Yoga & Pilates",
+                stat1: "Real-time Data", stat2: "Foot Traffic Increase", stat3: "ROI Monitoring", stat4: "Cost Per Acquisition", stat5: "Conversion Funnel", stat6: "Ad ROAS", stat7: "User Demographics", stat8: "Private Traffic Growth",
+                formTitle: "Customize Your Growth Strategy",
+                q1: "1. What is your business industry?",
+                q1Default: "Select specific category...",
+                g1: "F&B", o1_1: "Restaurant / Dining", o1_2: "Fast Food / Light Meals / Bistro", o1_3: "Cafe / Dessert", o1_4: "Hawker / Kopitiam", o1_5: "Bubble Tea / Beverage", o1_6: "Bar / Nightlife",
+                g2: "Beauty & Health", o2_1: "Hair Salon", o2_2: "Nail / Lash / Semi-permanent", o2_3: "Beauty / Aesthetics / Spa", o2_4: "TCM / Chiropractic / Massage", o2_5: "Gym / Yoga / Pilates",
+                g3: "Education & Services", o3_1: "Tutoring / Skill Training", o3_2: "Art / Dance / Music", o3_3: "Pet Grooming / Boarding", o3_4: "Domestic / Cleaning / Repair", o3_5: "Photography / Wedding / Event",
+                g4: "Retail & E-commerce", o4_1: "Fashion / Apparel / Accessories", o4_2: "Home / Lifestyle Goods", o4_3: "3C / Electronics", o4_4: "Beauty & Personal Care Retail", o4_5: "Supermarket / Convenience Store",
+                oOther: "Other (Click to type...)", pOtherInd: "Enter your specific industry...",
+                q2: "2. Store Location (SG Location)", pLoc: "e.g., 313 Somerset / Bedok Mall",
+                q3: "3. What is your biggest growth pain point? (Multiple)",
+                pp1: "Quiet weekday lunches", pp2: "Low brand awareness", pp3: "High traffic, low sales", pp4: "High delivery commissions", pp5: "Competitors big on TikTok", pp6: "Few Google Maps reviews", pp7: "Followers not converting", pp8: "Need festival sales burst",
+                q4: "4. Desired Content Direction (Multiple)",
+                cd1: "Influencer Store Visit", cd2: "Brand Image Video", cd3: "Founder Story", cd4: "Customer Testimonials", cd5: "Satisfying Process Close-ups", cd6: "Street Interviews", cd7: "Other needs...", pOtherDir: "Describe your other content ideas...",
+                q5: "5. Preferred Visual Style (Multiple)",
+                vs1: "Authentic & Grounded", vs2: "Premium & Elegant", vs3: "Cool & Techy", vs4: "Retro Cinematic", vs5: "Bright & Dopamine", vs6: "Minimalist Nordic", vs7: "Other...", pOtherStyle: "Describe your desired style...",
+                q6: "6. Specific Content Requirements (Key)", pReq: "1. Main product this month; 2. Core selling points; 3. Shooting taboos, etc.",
+                q7: "7. Any other additions (Optional)", pAdd: "Budget, publishing timeline, etc...",
+                q8: "8. Your Contact Info *", q9: "9. Email for receiving proposal *", pID: "ID or Number", wechat: "WeChat",
+                submitBtn: "Generate Exclusive Growth Proposal (Delivered within 24H)",
+                modalTitle: "AI Marketing Engine Processing...", mDone: "✅ Customizing Proposal"
+            },
+            zh: {
+                navContact: "联系顾问",
+                heroTitle: "AI营销全托管增长引擎",
+                heroSub: "专为新加坡本地生意定制",
+                heroDesc: "交付集策略拆解、本地拍摄、跨境后期、精准投流于一体的增长全案",
+                heroBtn: "立即生成我的 Brief",
+                cat1: "中式餐饮", cat2: "精致西餐", cat3: "时尚零售", cat4: "康养SPA", cat5: "美妆个护", cat6: "素质教育", cat7: "舞蹈培训", cat8: "健身私教", cat9: "瑜伽普拉提",
+                stat1: "实时数据监测", stat2: "到店客流提升", stat3: "ROI 监控", stat4: "获客成本(CPA)", stat5: "转化漏斗", stat6: "广告投放收益比", stat7: "用户画像分布", stat8: "私域留存增长",
+                formTitle: "定制您的增长策略",
+                q1: "1. 您的生意属于哪个赛道？",
+                q1Default: "请选择具体业务分类...",
+                g1: "餐饮/食品 (F&B)", o1_1: "正餐餐厅/酒楼", o1_2: "快餐/轻食/Bistro", o1_3: "咖啡馆/甜品店", o1_4: "档口/Hawker/Kopitiam", o1_5: "奶茶/各类饮品店", o1_6: "酒吧/夜生活/Bistro",
+                g2: "美容/美发/大健康 (Beauty & Health)", o2_1: "美发/造型沙龙", o2_2: "美甲/美睫/半永久", o2_3: "美容/医美/Spa", o2_4: "中医/正骨/推拿按摩", o2_5: "健身房/瑜伽/普拉提",
+                g3: "教育/服务 (Education & Services)", o3_1: "学术补习/技能培训", o3_2: "艺术/舞蹈/音乐教育", o3_3: "宠物美容/寄养服务", o3_4: "家政/清洁/维修服务", o3_5: "摄影/婚庆/策划服务",
+                g4: "零售/电商 (Retail)", o4_1: "服装/潮流/饰品", o4_2: "家居/生活百货", o4_3: "3C数码/家电零售", o4_4: "美妆个护零售", o4_5: "商超/便利店/食品零售",
+                oOther: "其他 (点击此处自行填写...)", pOtherInd: "输入您的具体行业或业态...",
+                q2: "2. 店铺具体位置 (SG Location)", pLoc: "例如: 313 Somerset / Bedok Mall",
+                q3: "3. 您目前最大的增长痛点是什么？(可多选)",
+                pp1: "工作日午市冷清", pp2: "新店知名度低", pp3: "旺丁不旺财", pp4: "外卖佣金太高", pp5: "对手TikTok很火", pp6: "谷歌地图评价少", pp7: "粉丝没法转化", pp8: "节日急需爆发",
+                q4: "4. 想要的内容方向 (可多选)",
+                cd1: "网红探店实拍", cd2: "精美品牌形象片", cd3: "老板出镜讲故事", cd4: "顾客真实评价视频", cd5: "解压制作过程特写", cd6: "街头随机采访谈话", cd7: "其他需求...", pOtherDir: "描述您的其他内容想法...",
+                q5: "5. 偏好的视觉风格 (可多选)",
+                vs1: "真实接地气", vs2: "高端精致感", vs3: "酷炫科技感", vs4: "复古电影感", vs5: "明亮多巴胺", vs6: "简约北欧风", vs7: "其他...", pOtherStyle: "请简述您想要的风格特征...",
+                q6: "6. 具体内容生产要求 (关键)", pReq: "1. 本月主推产品；2. 核心卖点；3. 拍摄禁忌等",
+                q7: "7. 其他任何补充 (Optional)", pAdd: "预算建议、发布节点等...",
+                q8: "8. 您的联系方式 *", q9: "9. 接收方案邮箱 *", pID: "ID或号码", wechat: "微信",
+                submitBtn: "一键生成专属增长方案 (24H内送达)",
+                modalTitle: "AI 营销引擎处理中...", mDone: "✅ 方案定制中"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            document.documentElement.lang = currentLang;
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                if(translations[currentLang][el.dataset.i18n]) el.innerText = translations[currentLang][el.dataset.i18n];
+            });
+            
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                if(translations[currentLang][el.dataset.i18nPh]) el.placeholder = translations[currentLang][el.dataset.i18nPh];
+            });
+
+            document.querySelectorAll('[data-i18n-label]').forEach(el => {
+                if(translations[currentLang][el.dataset.i18nLabel]) el.label = translations[currentLang][el.dataset.i18nLabel];
+            });
+        }
+
+        // --- 核心：收集数据并发送给 Formspree ---
+        async function generateBrief() {
+            const modal = document.getElementById('brief-modal');
+            const content = document.getElementById('brief-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = "";
+            document.getElementById('modal-title').innerText = translations[currentLang]['modalTitle'];
+            
+            // 1. 抓取表单所有数据
+            const formData = {
+                industry: document.getElementById('industry').value === 'other' ? document.getElementById('industry-other-input').value : document.getElementById('industry').value,
+                location: document.getElementById('location').value,
+                painPoints: Array.from(document.querySelectorAll('#pain-points-container .option-card.selected span')).map(el => el.innerText.trim()),
+                contentDirections: Array.from(document.querySelectorAll('#directions-container .tag-select.bg-indigo-600')).map(el => el.innerText.trim()),
+                visualStyles: Array.from(document.querySelectorAll('#styles-container .option-card.selected div')).map(el => el.innerText.trim()),
+                requirements: document.getElementById('requirements').value,
+                additions: document.getElementById('additions').value,
+                contactType: document.getElementById('contact-type').value,
+                contactId: document.getElementById('contact-id').value,
+                email: document.getElementById('email').value
+            };
+
+            // 简单验证必填项
+            if (!formData.email || !formData.contactId) {
+                content.innerHTML = currentLang === 'en' ? 
+                    "<span style='color: #ef4444;'>[Error] Please provide your Contact Info and Email!</span><br>" : 
+                    "<span style='color: #ef4444;'>[错误] 请填写联系方式和接收邮箱！</span><br>";
+                return;
+            }
+
+            // 2. 模拟动画效果的预设文案
+            const startingLines = currentLang === 'en' ? [
+                "> Scanning real-time ad heatmaps across Singapore industries...",
+                "> Precisely matching [Local Shooting Team] with [Cross-border Post-production Team]...",
+                "> Transmitting data to Flexible Planet core servers..."
+            ] : [
+                "> 正在实时扫描新加坡各业态投放热力图...",
+                "> 正在精准匹配 [本地摄影组] 与 [跨境后期组]...",
+                "> 正在传输多维度业务数据至核心服务器..."
+            ];
+
+            // 逐行打印开始动画
+            for(let line of startingLines) {
+                content.innerHTML += line + "<br>";
+                await new Promise(r => setTimeout(r, 600)); 
+            }
+
+            // 3. 真实发送请求给 Formspree
+            try {
+                // 已经替换为你创建的专属 URL
+                const formspreeURL = 'https://formspree.io/f/xreaoldk'; 
+
+                const response = await fetch(formspreeURL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // 防止 Formspree 跳转页面，维持在当前窗口
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const successLines = currentLang === 'en' ? [
+                        `> Data transmission complete!`,
+                        "--------------------------------------------------",
+                        "【 ✅ Request synced to Flexible Planet Growth Engine 】",
+                        "<br>Your exclusive growth proposal is being deeply customized. The PDF file will be sent to your email within 24 hours.",
+                        "Thank you for choosing Flexible Planet 🚀"
+                    ] : [
+                        `> 数据传输完成！`,
+                        "--------------------------------------------------",
+                        "【 ✅ 需求已同步至 Flexible Planet 增长引擎 】",
+                        "<br>您的专属增长方案正在深度定制中，PDF 文件将在 24 小时内发送至邮箱。",
+                        "感谢您选择 Flexible Planet 🚀"
+                    ];
+
+                    for(let line of successLines) {
+                        content.innerHTML += line + "<br>";
+                        await new Promise(r => setTimeout(r, 400));
+                    }
+                    document.getElementById('modal-title').innerText = translations[currentLang]['mDone'];
+                } else {
+                    if (Object.hasOwn(result, 'errors')) {
+                        throw new Error(result["errors"].map(error => error["message"]).join(", "));
+                    } else {
+                        throw new Error('网络请求错误');
+                    }
+                }
+            } catch (error) {
+                content.innerHTML += currentLang === 'en' ? 
+                    `<br><span style='color: #ef4444;'>[System Exception] Data submission failed: ${error.message}</span><br>` :
+                    `<br><span style='color: #ef4444;'>[系统异常] 数据提交失败：${error.message}</span><br>`;
+            }
+        }
+
+        function closeBrief() { document.getElementById('brief-modal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
